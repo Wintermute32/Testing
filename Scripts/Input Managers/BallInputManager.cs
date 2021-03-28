@@ -16,7 +16,7 @@ public class BallInputManager : MonoBehaviour
     float collisionTime;
     float timeDifference;
 
-    Dictionary<char, Vector2> inputDict;
+    Dictionary<string, Vector2> inputDict;
 
     public event EventHandler OnButtonPressed;
 
@@ -33,9 +33,9 @@ public class BallInputManager : MonoBehaviour
         Vector2 forceVectorNegY = new Vector2(0, -yPush);
         Vector2 forceVectorNegX = new Vector2(-xPush, 0);
 
-        inputDict = new Dictionary<char, Vector2>(){
-            {'w', forceVectorY},{'s', forceVectorNegY},{'a', forceVectorNegX },
-            {'d', forceVectorX}};
+        inputDict = new Dictionary<string, Vector2>(){
+            {"w", forceVectorY},{"s", forceVectorNegY},{"a", forceVectorNegX },
+            {"d", forceVectorX}};
     }
 
     private void Update()
@@ -52,22 +52,12 @@ public class BallInputManager : MonoBehaviour
     }
     public void CheckForButtonInput() //THIS MUST be in update. Trying Input.inputstring to get pressed key then check if its in dict
     {
-        if (Input.GetKeyDown(KeyCode.W))
-            VelocityManipulate('w', Time.time);    
-
-        if (Input.GetKeyDown(KeyCode.S))
-            VelocityManipulate('s', Time.time);
-            
-
-        if (Input.GetKeyDown(KeyCode.A))
-            VelocityManipulate('a', Time.time);
-
-        if (Input.GetKeyDown(KeyCode.D))
-            VelocityManipulate('d', Time.time);
+         VelocityManipulate(Input.inputString, Time.time);
     }
-    public void VelocityManipulate(char pressedKeys, float pressedTime)
+    public void VelocityManipulate(string pressedKeys, float pressedTime)
     {
-        //if (inputDict.ContainsKey(pressedKeys))
+        if (!inputDict.ContainsKey(pressedKeys))
+            return;
 
         timeDifference = Mathf.Abs(collisionTime - pressedTime);
         if (timeDifference < pressBuffer)
