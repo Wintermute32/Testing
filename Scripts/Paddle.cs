@@ -31,7 +31,6 @@ public class Paddle : MonoBehaviour
         paddlePos.x = Mathf.Clamp(GetXPos(), minX, maxX);
         
         transform.position = paddlePos;
-
     }
 
     private float GetXPos()
@@ -42,11 +41,11 @@ public class Paddle : MonoBehaviour
         }
         else
         {
-            //return Input.mousePosition.x / Screen.width * screenWidthInUnits;
+            return Input.mousePosition.x / Screen.width * screenWidthInUnits;
             //float axis = Input.GetAxis("Horizontal");
 
-             return transform.position.x + (Input.GetAxis("Horizontal")
-                    * screenWidthInUnits * Time.deltaTime) * paddleMoveSpeed;
+             //return transform.position.x + (Input.GetAxis("Horizontal")
+                    //* screenWidthInUnits * Time.deltaTime) * paddleMoveSpeed;
         }
  
     }

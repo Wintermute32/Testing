@@ -10,11 +10,13 @@ public class BallInputManager : MonoBehaviour
     [SerializeField] float pressBuffer;
     Rigidbody2D rigid2D;
 
-    ParticleSystem particle;
-    bool collisionBuffer;
+    Vector2 velocity;
+    bool collided;
+    string input;
     public VFX vfx;
     float collisionTime;
     float timeDifference;
+    float minSpeed;
 
     Dictionary<string, Vector2> inputDict;
 
@@ -23,6 +25,7 @@ public class BallInputManager : MonoBehaviour
     void Start()
     {
         NewBallSetup();
+        minSpeed = gameObject.GetComponent<Accelerator>().minSpeed;
     }
 
     private void NewBallSetup()
@@ -32,15 +35,18 @@ public class BallInputManager : MonoBehaviour
         Vector2 forceVectorX = new Vector2(xPush, 0);
         Vector2 forceVectorNegY = new Vector2(0, -yPush);
         Vector2 forceVectorNegX = new Vector2(-xPush, 0);
+        Vector2 forceVectorAngle = new Vector2(xPush, yPush);
+        Vector2 forceVectorAngleNeg = new Vector2(-xPush, yPush);
 
         inputDict = new Dictionary<string, Vector2>(){
             {"w", forceVectorY},{"s", forceVectorNegY},{"a", forceVectorNegX },
-            {"d", forceVectorX}};
+            {"d", forceVectorX}, {"wd", forceVectorAngle}, {"wa", forceVectorAngleNeg} };
     }
 
     private void Update()
     {
         CheckForButtonInput();
+        SlowBall();
     }
     void FixedUpdate()
     {
@@ -48,31 +54,51 @@ public class BallInputManager : MonoBehaviour
     }
     public void OnCollisionEnter2D(Collision2D collision)
     {
+        collided = true;
         collisionTime = Time.time;
     }
-    public void CheckForButtonInput() //THIS MUST be in update. Trying Input.inputstring to get pressed key then check if its in dict
+    public void CheckForButtonInput()
     {
-         VelocityManipulate(Input.inputString, Time.time);
+        if (Input.anyKeyDown)
+        {
+            input = Input.inputString;;
+            StartCoroutine(ResetPushTime());
+        }
+
+        if (inputDict.ContainsKey(input))
+            VelocityManipulate(input, Time.time);
     }
     public void VelocityManipulate(string pressedKeys, float pressedTime)
     {
-        if (!inputDict.ContainsKey(pressedKeys))
-            return;
-
         timeDifference = Mathf.Abs(collisionTime - pressedTime);
-        if (timeDifference < pressBuffer)
-        {
-            //Debug.Log("Ping Fired!" + inputDict[pressedKeys]);
 
+        if (timeDifference <= pressBuffer && collided)
+        {
             rigid2D.velocity += (inputDict[pressedKeys]);
             OnButtonPressed?.Invoke(this, EventArgs.Empty);
+            input = null;
         }
 
+        collided = false;
+
     }
-    public IEnumerator ButtonPressPeriod()
+
+    public IEnumerator ResetPushTime() //if ball hasn't collided yet, reset input
     {
-        collisionBuffer = true;
         yield return new WaitForSeconds(pressBuffer);
-        collisionBuffer = false;
+         input = null;
+    }
+
+    public void SlowBall()
+    {
+        //bool notTooSlow = rigid2D.velocity.x > minSpeed && rigid2D.velocity.y > minSpeed;
+
+        if (Input.GetMouseButton(1))
+        {
+            Debug.Log("Should be slowing down");
+            velocity = rigid2D.velocity * .99f;
+            rigid2D.velocity = velocity;
+            //OnButtonPressed?.Invoke(this, EventArgs.Empty);
+        }
     }
 }

@@ -2,9 +2,11 @@
 
 public class Accelerator : MonoBehaviour
 {
-    [Tooltip("min and max speed are still affected by drag, unless drag = 0")]
-    [SerializeField] float minSpeed;
-    [SerializeField] float maxSpeed;
+    [field: SerializeField]
+    public float minSpeed { get; set; }
+
+    [field: SerializeField]
+    public float maxSpeed { get; set; }
     public float ballSpeedX { get; private set; }
     public float ballSpeedY { get; private set; }
     Ball ball;
